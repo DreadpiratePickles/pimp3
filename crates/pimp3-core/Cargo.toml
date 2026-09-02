@@ -1,0 +1,13 @@
+[package]
+name = "pimp3-core"
+description = "Streaming MP3 decoder with seeking, built for WebAssembly"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+# Pure Rust, so the whole decoder cross-compiles to wasm32-unknown-unknown with
+# no C toolchain and no Emscripten runtime.
+symphonia = { version = "0.5", default-features = false, features = ["mp3"] }

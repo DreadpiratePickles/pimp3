@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>pimp3 — streaming MP3 decoder</title>
+    <meta name="description" content="MP3 decoding in WebAssembly with no Emscripten. Playback starts before the file finishes decoding." />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <header class="masthead">
+      <h1 class="wordmark">pimp3</h1>
+      <p class="standfirst">
+        An MP3 decoder compiled to WebAssembly with <em>no Emscripten</em> —
+        and, unlike the decode-the-whole-buffer demos it descends from, playback
+        starts before the file finishes decoding.
+      </p>
+      <p class="assurance"><span class="dot" aria-hidden="true"></span>Decoded locally. Nothing is uploaded.</p>
+    </header>
+
+    <main>
+      <section class="stage">
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-describedby="dropzone-hint">
+          <div>
+            <p class="dropzone-title">Drop an MP3 here</p>
+            <p id="dropzone-hint" class="dropzone-hint">or press Enter to browse</p>
+          </div>
+          <input id="file-input" type="file" accept=".mp3,audio/mpeg" hidden />
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite">Ready.</p>
+      </section>
+
+      <section id="deck" class="deck" hidden>
+        <div class="transport">
+          <button id="toggle" class="toggle" type="button" aria-label="Play">▶</button>
+          <div class="timeline">
+            <input id="scrub" class="scrub" type="range" min="0" max="1000" value="0"
+                   aria-label="Seek" />
+            <div class="times">
+              <span id="elapsed" class="mono">0:00</span>
+              <span id="total" class="mono">0:00</span>
+            </div>
+          </div>
+        </div>
+
+        <dl class="facts">
+          <div><dt>Sample rate</dt><dd id="fact-rate">—</dd></div>
+          <div><dt>Channels</dt><dd id="fact-channels">—</dd></div>
+          <div><dt>Buffered ahead</dt><dd id="fact-buffer">—</dd></div>
+          <div><dt>Frames lost</dt><dd id="fact-dropped">—</dd></div>
+        </dl>
+
+        <p class="note">
+          The buffer figure is the audio decoded but not yet played. It filling
+          up while the track plays is the streaming working: the worklet is
+          never waiting on the decoder.
+        </p>
+      </section>
+    </main>
+
+    <footer class="colophon">
+      <p>Pure Rust on <code>wasm32-unknown-unknown</code>. Verified against ffmpeg, sample for sample.</p>
+    </footer>
+
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

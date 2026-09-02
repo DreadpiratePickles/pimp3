@@ -1,0 +1,55 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+
+  reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: astral-sh/setup-uv@v5
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg lame
+      - run: cargo build --release -p pimp3-cli
+      # Regenerate the corpus so a drift between the generator and the committed
+      # fixtures fails here rather than silently testing stale bytes.
+      - run: uv run --with numpy python3 fixtures/generate.py
+      - run: git diff --exit-code --stat fixtures/ || (echo "committed fixtures differ from generator output" && exit 1)
+      - run: uv run --with numpy python3 fixtures/compare_reference.py
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: jetli/wasm-pack-action@v0.4.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: wasm-pack build crates/pimp3-wasm --target web --out-dir ../../web/src/wasm --release
+      - run: npm install
+        working-directory: web
+      - run: npm run build
+        working-directory: web

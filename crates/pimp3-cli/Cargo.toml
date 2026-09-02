@@ -1,0 +1,15 @@
+[package]
+name = "pimp3-cli"
+description = "Decode MP3 to WAV on the command line"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "pimp3"
+path = "src/main.rs"
+
+[dependencies]
+pimp3-core = { path = "../pimp3-core" }
