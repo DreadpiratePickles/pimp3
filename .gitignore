@@ -14,3 +14,7 @@ fixtures/*.pimp3.wav
 fixtures/*.src.wav
 
 .DS_Store
+
+# Python
+__pycache__/
+*.pyc

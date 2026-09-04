@@ -30,10 +30,11 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: sudo apt-get update && sudo apt-get install -y ffmpeg lame
       - run: cargo build --release -p pimp3-cli
-      # Regenerate the corpus so a drift between the generator and the committed
-      # fixtures fails here rather than silently testing stale bytes.
+      # Regenerate the corpus fresh, then verify it against ffmpeg. The check
+      # runs on exactly what the generator produces now, so it can never test
+      # stale bytes — while tolerating that LAME output is not byte-identical
+      # across encoder versions (we compare decoded audio, not committed bytes).
       - run: uv run --with numpy python3 fixtures/generate.py
-      - run: git diff --exit-code --stat fixtures/ || (echo "committed fixtures differ from generator output" && exit 1)
       - run: uv run --with numpy python3 fixtures/compare_reference.py
 
   web:
