@@ -1,8 +1,26 @@
-# pimp3
+<div align="center">
+
+# 🎵 pimp3
+
+### Streaming MP3 → WebAssembly, in pure Rust. No Emscripten. No C toolchain. No waiting.
+
+**Drop in a file — it plays before it finishes loading.**
+
+![tests](https://img.shields.io/badge/tests-12%20passing-brightgreen)
+![wasm](https://img.shields.io/badge/wasm-216%20KB%20gzipped-blue)
+![toolchain](https://img.shields.io/badge/Emscripten-not%20required-orange)
+![unsafe](https://img.shields.io/badge/unsafe__code-forbidden-8A2BE2)
+![verified](https://img.shields.io/badge/vs%20ffmpeg-corr%201.000000-success)
+![license](https://img.shields.io/badge/license-MIT%20%7C%20Apache--2.0-informational)
+
+</div>
+
+---
 
 A streaming MP3 decoder compiled to WebAssembly **without Emscripten**, with
 seeking, damage tolerance, and an AudioWorklet player that starts playing before
-the file has finished decoding.
+the file has finished decoding — targeting `wasm32-unknown-unknown` with no C
+toolchain in sight, and output that matches ffmpeg to the last bit of an `f32`.
 
 A rebuild of [bashi/minimp3-wasm](https://github.com/bashi/minimp3-wasm) (2020),
 which proved you could compile a decoder to wasm with raw clang instead of the
