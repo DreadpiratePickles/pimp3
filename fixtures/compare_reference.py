@@ -45,6 +45,9 @@ def read_float_wav(path: Path) -> tuple[np.ndarray, int, int]:
 
     Python's `wave` module rejects IEEE-float WAV (format tag 3), which is what
     both ffmpeg and pimp3 emit here, so the RIFF chunks are walked directly.
+    Some ffmpeg builds wrap that float format in WAVE_FORMAT_EXTENSIBLE
+    (tag 0xFFFE), where the real sample format is the SubFormat GUID instead;
+    both spellings are accepted.
     """
     blob = path.read_bytes()
     if blob[:4] != b"RIFF" or blob[8:12] != b"WAVE":
@@ -59,8 +62,14 @@ def read_float_wav(path: Path) -> tuple[np.ndarray, int, int]:
         body = blob[offset + 8 : offset + 8 + size]
         if chunk_id == b"fmt ":
             tag, channels, rate, _, _, bits = struct.unpack_from("<HHIIHH", body, 0)
-            if tag != 3:
-                raise ValueError(f"{path.name}: expected IEEE float (tag 3), got tag {tag}")
+            fmt_code = tag
+            if tag == 0xFFFE and len(body) >= 26:
+                # WAVE_FORMAT_EXTENSIBLE: the real format is the first two bytes
+                # of the SubFormat GUID (offset 24), after cbSize/validbits/mask.
+                (fmt_code,) = struct.unpack_from("<H", body, 24)
+            if fmt_code != 3:
+                raise ValueError(
+                    f"{path.name}: expected IEEE float, got format {fmt_code} (tag {tag})")
         elif chunk_id == b"data":
             data = body
         # Chunks are word-aligned.
